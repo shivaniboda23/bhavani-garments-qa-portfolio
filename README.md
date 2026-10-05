@@ -29,8 +29,8 @@ The portfolio demonstrates test planning, formal test-case design, exploratory a
 | `GITHUB_UPLOAD_GUIDE.md` | One-pass instructions for publishing this package safely |
 | `QA_READINESS_CHECKLIST.md` | Remaining learning and application checklist |
 | `.gitignore` | Prevents accidental publication of credentials, logs, databases, build output, and temporary files |
-| `evidence/postman-run-summary.png` | Collection Runner evidence showing 31 passed assertions and zero errors |
-| `evidence/postman-cleanup-proof.png` | Evidence for create, duplicate rejection, and deletion of the synthetic customer |
+| `postman-run-summary.png` | Collection Runner evidence showing 31 passed assertions and zero errors |
+| `postman-cleanup-proof.png` | Evidence for create, duplicate rejection, and deletion of the synthetic customer |
 
 ## Jira defect lifecycle evidence
 
@@ -72,6 +72,11 @@ The Postman collection was executed on 2026-10-03 against the local FastAPI envi
 | Duration | 3.813 seconds |
 | Average response time | 50 ms |
 | Cleanup | Synthetic customer deleted |
+### Execution evidence
+
+![Postman collection run showing 31 passed assertions](postman-run-summary.png)
+
+![Controlled customer creation, duplicate rejection, and cleanup](postman-cleanup-proof.png)
 
 Coverage included service health, bearer-token capture, protected-route 401, customer 404, sale-return 422 validation, customer creation 201, duplicate-phone rejection 400, and cleanup deletion 200.
 
