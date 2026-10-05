@@ -1,0 +1,452 @@
+{
+  "info": {
+    "_postman_id": "7c21ab4b-d08f-4e9e-96d4-3f37f72ceac4",
+    "name": "Bhavani Garments ERP - QA Portfolio",
+    "description": "Executed QA portfolio checks for the local FastAPI backend. The collection covers health, bearer authentication, authenticated read-only contracts, an explicit 401 check without a token, safe schema validation, and a controlled create/duplicate/delete workflow. The optional mutation folder must run only against a disposable local database.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:5000"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Health",
+      "item": [
+        {
+          "name": "Health Check - 200",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/",
+            "description": "Confirms that the local FastAPI service is reachable before authenticated checks run."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response identifies the running ERP API', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.status).to.eql('running');",
+                  "  pm.expect(body.project).to.eql('Bhavani ERP');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Authentication",
+      "item": [
+        {
+          "name": "Login - Capture Token - 200",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "username", "value": "{{username}}", "type": "text" },
+                { "key": "password", "value": "{{password}}", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/auth/login",
+            "description": "Enter local credentials in the environment. A successful response stores access_token for the remaining requests."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('Bearer token is returned', function () {",
+                  "    pm.expect(body.access_token).to.be.a('string').and.not.empty;",
+                  "    pm.expect(body.token_type.toLowerCase()).to.eql('bearer');",
+                  "  });",
+                  "  pm.environment.set('access_token', body.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Read-Only Core Checks",
+      "item": [
+        {
+          "name": "List Customers - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/customers/shop/{{shop_id}}",
+            "description": "The route uses the authenticated user's shop scope. The path shop_id is retained because it is part of the current API contract."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is a customer array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Existing Customer - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/customers/{{customer_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Customer identity is returned', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.id).to.eql(Number(pm.environment.get('customer_id')));",
+                  "  pm.expect(body.customer_name).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Missing Customer - 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/customers/{{missing_customer_id}}",
+            "description": "Non-mutating negative test for the 404 contract."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Error detail is present', function () { pm.expect(pm.response.json().detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Products - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/products"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is an array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search Products - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/products/search?q={{product_query}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Search response is an array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard Summary - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/dashboard/summary"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Summary is a JSON object', function () { pm.expect(pm.response.json()).to.be.an('object'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Sale Detail - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/sales/{{sale_id}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Sale ID matches the requested record', function () { pm.expect(pm.response.json().id).to.eql(Number(pm.environment.get('sale_id'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supplier Balance Summary - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/supplier-payment/supplier/{{supplier_id}}/summary"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Summary is a JSON object', function () { pm.expect(pm.response.json()).to.be.an('object'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supplier Ledger Regression - 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/supplier-payment/supplier/{{supplier_id}}/ledger",
+            "description": "Regression for the offset-naive/offset-aware datetime comparison failure previously returning 500."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Ledger response is a JSON object', function () { pm.expect(pm.response.json()).to.be.an('object'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Safe Validation (Non-Mutating)",
+      "item": [
+        {
+          "name": "List Customers Without Token - 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{base_url}}/customers/shop/{{shop_id}}",
+            "description": "Negative authentication check. This request intentionally overrides collection bearer authentication and sends no token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });",
+                  "pm.test('Authentication error detail is returned', function () { const body = pm.response.json(); pm.expect(body.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid Sale Return Split - 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sale_id\": {{sale_id}},\n  \"customer_id\": {{customer_id}},\n  \"reason\": \"QA schema validation only\",\n  \"refund_amount\": 1,\n  \"items\": [\n    {\n      \"variant_id\": {{variant_id}},\n      \"quantity\": 2,\n      \"k_quantity\": 1,\n      \"r_quantity\": 0\n    }\n  ]\n}"
+            },
+            "url": "{{base_url}}/sale-return/create",
+            "description": "The quantity intentionally differs from K + R. Pydantic should return 422 before the endpoint performs any database mutation."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 422', function () { pm.response.to.have.status(422); });",
+                  "pm.test('Validation detail is returned', function () { pm.expect(pm.response.json().detail).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - Optional Local Mutation (Run in Order)",
+      "description": "Run only against a disposable local database. The first request creates one synthetic customer, the second verifies a 400 duplicate-phone response, and the third deletes only the captured synthetic record.",
+      "item": [
+        {
+          "name": "Create Synthetic Customer - 201",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suffix = Date.now().toString().slice(-9);",
+                  "pm.environment.set('qa_customer_phone', `9${suffix}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.environment.set('created_customer_id', String(body.id));",
+                  "  pm.test('Synthetic customer was created', function () {",
+                  "    pm.expect(body.customer_name).to.eql('QA Portfolio Customer');",
+                  "    pm.expect(body.phone).to.eql(pm.environment.get('qa_customer_phone'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"QA Portfolio Customer\",\n  \"phone\": \"{{qa_customer_phone}}\",\n  \"email\": \"qa.portfolio@example.com\",\n  \"address\": \"Local test data\",\n  \"gst_number\": null\n}"
+            },
+            "url": "{{base_url}}/customers"
+          }
+        },
+        {
+          "name": "Duplicate Customer Phone - 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"QA Duplicate Check\",\n  \"phone\": \"{{qa_customer_phone}}\",\n  \"email\": null,\n  \"address\": null,\n  \"gst_number\": null\n}"
+            },
+            "url": "{{base_url}}/customers",
+            "description": "Uses the exact phone created by the preceding request. The API should reject it without creating a second customer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Duplicate validation detail is present', function () { pm.expect(pm.response.json().detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Synthetic Customer - 200",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/customers/{{created_customer_id}}",
+            "description": "Deletes only the record ID captured by Create Synthetic Customer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.environment.unset('created_customer_id'); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
