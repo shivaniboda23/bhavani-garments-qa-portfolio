@@ -31,6 +31,7 @@ The portfolio demonstrates test planning, formal test-case design, exploratory a
 | `.gitignore` | Prevents accidental publication of credentials, logs, databases, build output, and temporary files |
 | `postman-run-summary.png` | Collection Runner evidence showing 31 passed assertions and zero errors |
 | `postman-cleanup-proof.png` | Evidence for create, duplicate rejection, and deletion of the synthetic customer |
+| [PostgreSQL database validation](database-testing/README.md) | 13 read-only checks; 11 passed, 2 historical quantity checks require review |
 
 ## Jira defect lifecycle evidence
 
