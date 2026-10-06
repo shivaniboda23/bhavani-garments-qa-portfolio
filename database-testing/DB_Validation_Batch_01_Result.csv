@@ -1,0 +1,7 @@
+database_name,executed_at,test_id,test_name,records_checked,expected_issues,issues_found,result
+bhavani_erp_v2,2026-10-06 14:42:38.759719+05:30,DB-001,Payments reference existing bills,19,0,0,PASS
+bhavani_erp_v2,2026-10-06 14:42:38.759719+05:30,DB-002,Bill items reference existing bills,18,0,0,PASS
+bhavani_erp_v2,2026-10-06 14:42:38.759719+05:30,DB-003,Sale items reference existing sales,18,0,0,PASS
+bhavani_erp_v2,2026-10-06 14:42:38.759719+05:30,DB-004,Return items reference existing returns,8,0,0,PASS
+bhavani_erp_v2,2026-10-06 14:42:38.759719+05:30,DB-005,Bill customers exist in the same shop,12,0,0,PASS
+bhavani_erp_v2,2026-10-06 14:42:38.759719+05:30,DB-006,Linked bills and sales match shop and customer,9,0,0,PASS
