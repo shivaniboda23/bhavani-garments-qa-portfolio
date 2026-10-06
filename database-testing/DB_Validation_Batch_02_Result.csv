@@ -1,0 +1,8 @@
+database_name,executed_at,test_id,test_name,records_checked,issues_found,result
+bhavani_erp_v2,2026-10-06 14:57:44.899014+05:30,DB-007,Sale item quantity equals K plus R,18,4,REVIEW REQUIRED
+bhavani_erp_v2,2026-10-06 14:57:44.899014+05:30,DB-008,Sale return item quantity equals K plus R,8,2,REVIEW REQUIRED
+bhavani_erp_v2,2026-10-06 14:57:44.899014+05:30,DB-009,Sale returns match their sale shop and customer,8,0,PASS
+bhavani_erp_v2,2026-10-06 14:57:44.899014+05:30,DB-010,Returned variant appears on the original sale,8,0,PASS
+bhavani_erp_v2,2026-10-06 14:57:44.899014+05:30,DB-011,Payment amounts are positive,19,0,PASS
+bhavani_erp_v2,2026-10-06 14:57:44.899014+05:30,DB-012,Bill totals are not negative,17,0,PASS
+bhavani_erp_v2,2026-10-06 14:57:44.899014+05:30,DB-013,Sale return refunds are not negative,8,0,PASS
